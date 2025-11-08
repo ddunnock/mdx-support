@@ -1,1 +1,1 @@
-console.log('Happy developing ✨')
+// Entry point for the plugin

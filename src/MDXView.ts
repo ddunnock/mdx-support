@@ -14,7 +14,7 @@ export class MDXView extends ItemView {
     plugin: MDXPlugin;
     file: TFile | null = null;
     root: Root | null = null;
-    containerEl: HTMLElement;
+    containerEl!: HTMLElement;
 
     constructor(leaf: WorkspaceLeaf, plugin: MDXPlugin) {
         super(leaf);
@@ -26,7 +26,7 @@ export class MDXView extends ItemView {
     }
 
     getDisplayText(): string {
-        return this.file?.basename ?? 'MDX View';
+        return this.file?.basename ?? 'MDX view';
     }
 
     getIcon(): string {
@@ -52,7 +52,7 @@ export class MDXView extends ItemView {
         return state;
     }
 
-    async onOpen(): Promise<void> {
+    onOpen(): Promise<void> {
         this.containerEl = this.contentEl.createDiv({ cls: 'mdx-view-container' });
 
         // Watch for file changes
@@ -63,12 +63,16 @@ export class MDXView extends ItemView {
                 }
             })
         );
+
+        return Promise.resolve();
     }
 
-    async onClose(): Promise<void> {
+    onClose(): Promise<void> {
         if (this.root) {
             this.root.unmount();
         }
+
+        return Promise.resolve();
     }
 
     async renderMDX() {
@@ -97,7 +101,7 @@ export class MDXView extends ItemView {
             console.error('Error rendering MDX:', error);
             this.containerEl.empty();
             this.containerEl.createEl('div', {
-                text: `Error rendering MDX: ${error.message}`,
+                text: `Error rendering MDX: ${error instanceof Error ? error.message : String(error)}`,
                 cls: 'mdx-error'
             });
         }

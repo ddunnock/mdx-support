@@ -32,12 +32,7 @@ export class MDXSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('MDX plugin settings')
-            .setHeading();
-
-        // Behavior settings
-        new Setting(containerEl)
-            .setName('Behavior')
+            .setName('File behavior')
             .setHeading();
 
         new Setting(containerEl)
@@ -50,14 +45,13 @@ export class MDXSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        // Rendering settings
         new Setting(containerEl)
             .setName('Rendering')
             .setHeading();
 
         new Setting(containerEl)
             .setName('Enable JSX')
-            .setDesc('Allow JSX components in MDX files')
+            .setDesc('Allow JSX components in MDX files.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableJSX)
                 .onChange(async (value) => {
@@ -67,7 +61,7 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Allow HTML tags')
-            .setDesc('Allow raw HTML tags in MDX content')
+            .setDesc('Allow raw HTML tags in MDX content.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.allowHTMLTags)
                 .onChange(async (value) => {
@@ -77,20 +71,20 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Theme')
-            .setDesc('Select the theme for MDX rendering')
+            .setDesc('Select the theme for MDX rendering.')
             .addDropdown(dropdown => dropdown
                 .addOption('auto', 'Auto')
                 .addOption('light', 'Light')
                 .addOption('dark', 'Dark')
                 .setValue(this.plugin.settings.theme)
-                .onChange(async (value: 'light' | 'dark' | 'auto') => {
-                    this.plugin.settings.theme = value;
+                .onChange(async (value) => {
+                    this.plugin.settings.theme = value as 'light' | 'dark' | 'auto';
                     await this.plugin.saveSettings();
                 }));
 
         new Setting(containerEl)
             .setName('Enable syntax highlighting')
-            .setDesc('Enable syntax highlighting for code blocks in MDX')
+            .setDesc('Enable syntax highlighting for code blocks in MDX.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableSyntaxHighlight)
                 .onChange(async (value) => {

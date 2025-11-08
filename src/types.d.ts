@@ -1,22 +1,36 @@
 declare module '*.mdx' {
-    let MDXComponent: (props: any) => JSX.Element;
+    let MDXComponent: (props: Record<string, unknown>) => JSX.Element;
     export default MDXComponent;
 }
 
 declare module '@mdx-js/mdx' {
+    import * as React from 'react';
+
+    export interface CompileOptions {
+        [key: string]: unknown;
+    }
+
+    export interface EvaluateOptions extends CompileOptions {
+        development?: boolean;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        useMDXComponents?: () => Record<string, React.ComponentType<any>>;
+    }
+
     export function compile(
         content: string,
-        options?: any
+        options?: CompileOptions
     ): Promise<{ value: string }>;
 
     export function evaluate(
         content: string,
-        options?: any
+        options?: EvaluateOptions
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<{ default: React.ComponentType<any> }>;
 
     export function run(
         code: string,
-        options?: any
+        options?: CompileOptions
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<{ default: React.ComponentType<any> }>;
 }
 
@@ -25,6 +39,7 @@ declare module '@mdx-js/react' {
 
     export interface MDXProviderProps {
         children: React.ReactNode;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         components?: Record<string, React.ComponentType<any>>;
     }
 

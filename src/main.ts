@@ -1,4 +1,4 @@
-import { Plugin, TFile, WorkspaceLeaf, normalizePath, Notice, addIcon } from 'obsidian';
+import { Plugin, TFile, normalizePath, Notice, addIcon } from 'obsidian';
 import { MDXView, VIEW_TYPE_MDX } from './MDXView';
 import { MDXPluginSettings, DEFAULT_SETTINGS, MDXSettingTab } from './settings';
 
@@ -16,7 +16,7 @@ const MDX_ICON_COLOR = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w
 </svg>`;
 
 export default class MDXPlugin extends Plugin {
-    settings: MDXPluginSettings;
+    settings!: MDXPluginSettings;
 
     async onload() {
         // Register custom MDX icons
@@ -40,7 +40,7 @@ export default class MDXPlugin extends Plugin {
 
         // Add ribbon icon to create new MDX file
         this.addRibbonIcon('mdx-bw', 'New MDX file', () => {
-            this.createNewMDXFile();
+            void this.createNewMDXFile();
         });
 
         // Add command to preview MDX file (for when auto-open is disabled)
@@ -51,7 +51,7 @@ export default class MDXPlugin extends Plugin {
                 const file = this.app.workspace.getActiveFile();
                 if (file && file.extension === 'mdx') {
                     if (!checking) {
-                        this.openMDXPreview(file);
+                        void this.openMDXPreview(file);
                     }
                     return true;
                 }
@@ -64,7 +64,7 @@ export default class MDXPlugin extends Plugin {
             id: 'new-mdx-file',
             name: 'New MDX file',
             callback: () => {
-                this.createNewMDXFile();
+                void this.createNewMDXFile();
             }
         });
 
@@ -76,7 +76,7 @@ export default class MDXPlugin extends Plugin {
                 const file = this.app.workspace.getActiveFile();
                 if (file && file.extension === 'mdx') {
                     if (!checking) {
-                        this.editMDXSource(file);
+                        void this.editMDXSource(file);
                     }
                     return true;
                 }
@@ -160,7 +160,7 @@ export default class MDXPlugin extends Plugin {
             const leaf = this.app.workspace.getLeaf(false);
             await leaf.openFile(file, { active: true });
         } catch (error) {
-            new Notice(`Failed to create MDX file: ${error.message}`);
+            new Notice(`Failed to create MDX file: ${error instanceof Error ? error.message : String(error)}`);
             console.error('Error creating MDX file:', error);
         }
     }

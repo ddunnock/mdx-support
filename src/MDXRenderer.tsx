@@ -67,7 +67,8 @@ const defaultComponents = {
     ),
 };
 
-type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<Record<string, unknown>>> }>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<any>> }>;
 
 export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, filePath }) => {
     const [Component, setComponent] = useState<MDXComponent | null>(null);
