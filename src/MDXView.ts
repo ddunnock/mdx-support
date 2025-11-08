@@ -1,0 +1,111 @@
+import { ItemView, TFile, WorkspaceLeaf } from 'obsidian';
+import { Root, createRoot } from 'react-dom/client';
+import * as React from 'react';
+import { MDXRenderer } from './MDXRenderer';
+import MDXPlugin from './main';
+
+export const VIEW_TYPE_MDX = 'mdx-view';
+
+interface MDXViewState extends Record<string, unknown> {
+    file?: string;
+}
+
+export class MDXView extends ItemView {
+    plugin: MDXPlugin;
+    file: TFile | null = null;
+    root: Root | null = null;
+    containerEl: HTMLElement;
+
+    constructor(leaf: WorkspaceLeaf, plugin: MDXPlugin) {
+        super(leaf);
+        this.plugin = plugin;
+    }
+
+    getViewType(): string {
+        return VIEW_TYPE_MDX;
+    }
+
+    getDisplayText(): string {
+        return this.file?.basename ?? 'MDX View';
+    }
+
+    getIcon(): string {
+        return 'mdx-color';
+    }
+
+    async setState(state: MDXViewState, result: any): Promise<void> {
+        console.log('MDX View: setState called with state:', state);
+
+        if (state.file) {
+            const file = this.app.vault.getAbstractFileByPath(state.file);
+            if (file instanceof TFile) {
+                this.file = file;
+                console.log('MDX View: File set from state:', this.file.path);
+                await this.renderMDX();
+            }
+        }
+
+        await super.setState(state, result);
+    }
+
+    getState(): MDXViewState {
+        const state: MDXViewState = {
+            file: this.file?.path
+        };
+        console.log('MDX View: getState called, returning:', state);
+        return state;
+    }
+
+    async onOpen() {
+        console.log('MDX View: onOpen called');
+        this.containerEl = this.contentEl.createDiv({ cls: 'mdx-view-container' });
+
+        // Watch for file changes
+        this.registerEvent(
+            this.app.vault.on('modify', (file) => {
+                if (file === this.file) {
+                    console.log('MDX View: File modified', file.path);
+                    this.renderMDX();
+                }
+            })
+        );
+    }
+
+    async onClose() {
+        if (this.root) {
+            this.root.unmount();
+        }
+    }
+
+    async renderMDX() {
+        if (!this.file) return;
+
+        try {
+            const content = await this.app.vault.read(this.file);
+
+            // Clear previous render
+            if (this.root) {
+                this.root.unmount();
+            }
+
+            this.containerEl.empty();
+
+            // Create new root and render
+            this.root = createRoot(this.containerEl);
+            this.root.render(
+                React.createElement(MDXRenderer, {
+                    content,
+                    settings: this.plugin.settings,
+                    filePath: this.file.path
+                })
+            );
+        } catch (error) {
+            console.error('Error rendering MDX:', error);
+            this.containerEl.empty();
+            this.containerEl.createEl('div', {
+                text: `Error rendering MDX: ${error.message}`,
+                cls: 'mdx-error'
+            });
+        }
+    }
+}

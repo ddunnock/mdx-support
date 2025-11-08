@@ -1,0 +1,264 @@
+/* MDX View Container */
+.mdx-view-container {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* MDX Content */
+.mdx-content {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: var(--font-text);
+    font-size: var(--font-text-size);
+    line-height: 1.6;
+    color: var(--text-normal);
+}
+
+.mdx-content h1,
+.mdx-content h2,
+.mdx-content h3,
+.mdx-content h4,
+.mdx-content h5,
+.mdx-content h6 {
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: var(--text-title-h1);
+}
+
+.mdx-content h1 { font-size: 2em; }
+.mdx-content h2 { font-size: 1.5em; }
+.mdx-content h3 { font-size: 1.25em; }
+
+.mdx-content p {
+    margin-bottom: 1em;
+}
+
+.mdx-content code {
+    background-color: var(--code-background);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+    color: var(--code-normal);
+}
+
+.mdx-content pre {
+    background-color: var(--code-background);
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1em;
+    border: 1px solid var(--background-modifier-border);
+    line-height: 1.5;
+}
+
+.mdx-content pre code {
+    background-color: transparent;
+    padding: 0;
+    color: var(--code-normal);
+    display: block;
+}
+
+/* Enhanced code block styling */
+.mdx-content pre code .token.comment,
+.mdx-content pre code .token.prolog,
+.mdx-content pre code .token.doctype,
+.mdx-content pre code .token.cdata {
+    color: var(--text-faint);
+    font-style: italic;
+}
+
+.mdx-content pre code .token.keyword,
+.mdx-content pre code .token.selector,
+.mdx-content pre code .token.important,
+.mdx-content pre code .token.atrule {
+    color: var(--text-accent);
+    font-weight: 600;
+}
+
+.mdx-content pre code .token.string,
+.mdx-content pre code .token.char,
+.mdx-content pre code .token.attr-value,
+.mdx-content pre code .token.regex,
+.mdx-content pre code .token.variable {
+    color: var(--color-green);
+}
+
+.mdx-content pre code .token.number,
+.mdx-content pre code .token.boolean,
+.mdx-content pre code .token.constant {
+    color: var(--color-orange);
+}
+
+.mdx-content pre code .token.function,
+.mdx-content pre code .token.class-name {
+    color: var(--color-blue);
+}
+
+.mdx-content pre code .token.operator,
+.mdx-content pre code .token.entity,
+.mdx-content pre code .token.url {
+    color: var(--text-normal);
+}
+
+/* Custom Components */
+.mdx-alert {
+    padding: 12px 16px;
+    margin: 1em 0;
+    border-left: 4px solid;
+    border-radius: 4px;
+}
+
+.mdx-alert-info {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-color: #007bff;
+    color: var(--text-normal);
+}
+
+.mdx-alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+    color: var(--text-normal);
+}
+
+.mdx-alert-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+    color: var(--text-normal);
+}
+
+.mdx-alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+    color: var(--text-normal);
+}
+
+.mdx-callout {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 1em 0;
+}
+
+.mdx-callout-info {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-color: #007bff;
+}
+
+.mdx-callout-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+}
+
+.mdx-callout-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-title-h1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mdx-callout-icon {
+    font-size: 1.2em;
+}
+
+.mdx-callout-content {
+    color: var(--text-normal);
+}
+
+.mdx-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background-color: var(--background-secondary);
+    border-radius: 6px;
+    margin: 1em 0;
+}
+
+.mdx-counter button {
+    background-color: var(--interactive-accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.mdx-counter button:hover {
+    background-color: var(--interactive-accent-hover);
+}
+
+.mdx-counter span {
+    min-width: 30px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Loading and Error States */
+.mdx-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: var(--text-muted);
+    font-size: 1.2em;
+}
+
+.mdx-error {
+    padding: 20px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    margin: 20px;
+}
+
+.mdx-error h3 {
+    color: #dc3545;
+    margin-top: 0;
+}
+
+.mdx-error pre {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+}
+
+/* Storybook Components */
+.mdx-code-snippets {
+    padding: 8px 12px;
+    background-color: var(--background-secondary);
+    border-radius: 4px;
+    margin: 1em 0;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.mdx-if-renderer,
+.mdx-if {
+    margin: 0;
+}
+
+/* Make ribbon icons larger and more visible */
+.side-dock-ribbon.mod-left .side-dock-ribbon-action svg,
+.side-dock-ribbon.mod-right .side-dock-ribbon-action svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Tab icons for MDX files - make them bigger and more visible */
+.workspace .workspace-leaf-content[data-type="mdx-view"] .view-header-icon svg,
+.workspace .workspace-tab-header[data-type="mdx-view"] .workspace-tab-header-inner-icon svg {
+    width: 36px;
+    height: 36px;
+}

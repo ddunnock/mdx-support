@@ -1,0 +1,11 @@
+{
+  "id": "obsidian-mdx-plugin",
+  "name": "MDX Support",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Render MDX files with interactive React components and Storybook support.",
+  "author": "David Dunnock",
+  "authorUrl": "https://github.com/ddunnock",
+  "fundingUrl": "https://buymeacoffee.com/ddunnock",
+  "isDesktopOnly": true
+}
