@@ -67,7 +67,7 @@ const defaultComponents = {
     ),
 };
 
-type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<any>> }>;
+type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<Record<string, unknown>>> }>;
 
 export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, filePath }) => {
     const [Component, setComponent] = useState<MDXComponent | null>(null);
@@ -76,11 +76,8 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
     useEffect(() => {
         const compileMDX = async () => {
             try {
-                console.log('MDX Renderer: Starting evaluation for file:', filePath);
-
                 // Strip frontmatter before compiling
                 const contentWithoutFrontmatter = stripFrontmatter(content);
-                console.log('MDX Renderer: Content length after stripping frontmatter:', contentWithoutFrontmatter.length);
 
                 // Evaluate MDX - this compiles and runs it in one step
                 const { default: MDXContent } = await evaluate(contentWithoutFrontmatter, {
@@ -89,18 +86,15 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
                     useMDXComponents: () => defaultComponents,
                 });
 
-                console.log('MDX Renderer: Component created successfully');
                 setComponent(() => MDXContent);
                 setError(null);
             } catch (err) {
-                console.error('MDX Renderer: Evaluation error:', err);
-                console.error('MDX Renderer: Error stack:', err instanceof Error ? err.stack : 'No stack');
                 setError(err instanceof Error ? err.message : String(err));
                 setComponent(null);
             }
         };
 
-        compileMDX();
+        void compileMDX();
     }, [content, settings, filePath]);
 
     if (error) {

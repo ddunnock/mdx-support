@@ -31,10 +31,14 @@ export class MDXSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'MDX Plugin Settings' });
+        new Setting(containerEl)
+            .setName('MDX plugin settings')
+            .setHeading();
 
         // Behavior settings
-        containerEl.createEl('h3', { text: 'Behavior' });
+        new Setting(containerEl)
+            .setName('Behavior')
+            .setHeading();
 
         new Setting(containerEl)
             .setName('Auto-open MDX files')
@@ -47,7 +51,9 @@ export class MDXSettingTab extends PluginSettingTab {
                 }));
 
         // Rendering settings
-        containerEl.createEl('h3', { text: 'Rendering' });
+        new Setting(containerEl)
+            .setName('Rendering')
+            .setHeading();
 
         new Setting(containerEl)
             .setName('Enable JSX')
@@ -60,7 +66,7 @@ export class MDXSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Allow HTML Tags')
+            .setName('Allow HTML tags')
             .setDesc('Allow raw HTML tags in MDX content')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.allowHTMLTags)

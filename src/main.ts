@@ -19,8 +19,6 @@ export default class MDXPlugin extends Plugin {
     settings: MDXPluginSettings;
 
     async onload() {
-        console.log('Loading MDX Plugin');
-
         // Register custom MDX icons
         addIcon('mdx-bw', MDX_ICON_BW);
         addIcon('mdx-color', MDX_ICON_COLOR);
@@ -70,6 +68,22 @@ export default class MDXPlugin extends Plugin {
             }
         });
 
+        // Add command to edit MDX source
+        this.addCommand({
+            id: 'edit-mdx-source',
+            name: 'Edit MDX source',
+            checkCallback: (checking: boolean) => {
+                const file = this.app.workspace.getActiveFile();
+                if (file && file.extension === 'mdx') {
+                    if (!checking) {
+                        this.editMDXSource(file);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
         // Add settings tab
         this.addSettingTab(new MDXSettingTab(this.app, this));
 
@@ -83,6 +97,15 @@ export default class MDXPlugin extends Plugin {
                             .setIcon('mdx-color')
                             .onClick(async () => {
                                 await this.openMDXPreview(file);
+                            });
+                    });
+
+                    menu.addItem((item) => {
+                        item
+                            .setTitle('Edit MDX source')
+                            .setIcon('mdx-bw')
+                            .onClick(async () => {
+                                await this.editMDXSource(file);
                             });
                     });
                 }
@@ -157,8 +180,19 @@ export default class MDXPlugin extends Plugin {
         await leaf.openFile(file, { active: true });
     }
 
+    /**
+     * Edit MDX source code in markdown mode
+     */
+    async editMDXSource(file: TFile) {
+        const leaf = this.app.workspace.getLeaf(false);
+        await leaf.setViewState({
+            type: 'markdown',
+            state: { file: file.path, mode: 'source' }
+        });
+    }
+
     onunload() {
-        console.log('Unloading MDX Plugin');
+        // Plugin cleanup
     }
 
     async loadSettings() {

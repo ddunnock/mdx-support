@@ -1,4 +1,4 @@
-import { ItemView, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, TFile, WorkspaceLeaf, ViewStateResult } from 'obsidian';
 import { Root, createRoot } from 'react-dom/client';
 import * as React from 'react';
 import { MDXRenderer } from './MDXRenderer';
@@ -33,14 +33,11 @@ export class MDXView extends ItemView {
         return 'mdx-color';
     }
 
-    async setState(state: MDXViewState, result: any): Promise<void> {
-        console.log('MDX View: setState called with state:', state);
-
+    async setState(state: MDXViewState, result: ViewStateResult): Promise<void> {
         if (state.file) {
             const file = this.app.vault.getAbstractFileByPath(state.file);
             if (file instanceof TFile) {
                 this.file = file;
-                console.log('MDX View: File set from state:', this.file.path);
                 await this.renderMDX();
             }
         }
@@ -52,26 +49,23 @@ export class MDXView extends ItemView {
         const state: MDXViewState = {
             file: this.file?.path
         };
-        console.log('MDX View: getState called, returning:', state);
         return state;
     }
 
-    async onOpen() {
-        console.log('MDX View: onOpen called');
+    async onOpen(): Promise<void> {
         this.containerEl = this.contentEl.createDiv({ cls: 'mdx-view-container' });
 
         // Watch for file changes
         this.registerEvent(
             this.app.vault.on('modify', (file) => {
                 if (file === this.file) {
-                    console.log('MDX View: File modified', file.path);
-                    this.renderMDX();
+                    void this.renderMDX();
                 }
             })
         );
     }
 
-    async onClose() {
+    async onClose(): Promise<void> {
         if (this.root) {
             this.root.unmount();
         }
