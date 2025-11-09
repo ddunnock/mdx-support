@@ -61,7 +61,7 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Allow HTML tags')
-            .setDesc('Allow raw HTML tags in MDX content.')
+            .setDesc('Allow raw HTML tags in mdx content.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.allowHTMLTags)
                 .onChange(async (value) => {
@@ -71,7 +71,7 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Theme')
-            .setDesc('Select the theme for MDX rendering.')
+            .setDesc('Select the theme for mdx rendering.')
             .addDropdown(dropdown => dropdown
                 .addOption('auto', 'Auto')
                 .addOption('light', 'Light')
