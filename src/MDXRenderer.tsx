@@ -221,6 +221,31 @@ const defaultComponents = {
             {children}
         </div>
     ),
+    // Storybook home page components - placeholders
+    HomeRenderers: () => (
+        <div className="mdx-component-placeholder">
+            <div className="mdx-component-placeholder-title">⚠️ Storybook HomeRenderers component</div>
+            <div className="mdx-component-placeholder-description">
+                This interactive component is only available in Storybook.
+            </div>
+        </div>
+    ),
+    HomeConcepts: () => (
+        <div className="mdx-component-placeholder">
+            <div className="mdx-component-placeholder-title">⚠️ Storybook HomeConcepts component</div>
+            <div className="mdx-component-placeholder-description">
+                This interactive component is only available in Storybook.
+            </div>
+        </div>
+    ),
+    HomeResources: () => (
+        <div className="mdx-component-placeholder">
+            <div className="mdx-component-placeholder-title">⚠️ Storybook HomeResources component</div>
+            <div className="mdx-component-placeholder-description">
+                This interactive component is only available in Storybook.
+            </div>
+        </div>
+    ),
     Video: (props: { src?: string; autoPlay?: boolean; loop?: boolean; muted?: boolean; children?: React.ReactNode }) => {
         const currentFilePath = React.useContext(FilePathContext);
         const app = React.useContext(AppContext);
@@ -295,7 +320,7 @@ const defaultComponents = {
                 }
 
                 const resourcePath = app.vault.adapter.getResourcePath(resolvedPath);
-                setResolvedSrc(resolvedPath);
+                setResolvedSrc(resourcePath);
             };
 
             void resolveVideoPath();
@@ -444,7 +469,7 @@ const defaultComponents = {
                 }
 
                 const resourcePath = app.vault.adapter.getResourcePath(resolvedPath);
-                setResolvedSrc(resolvedPath);
+                setResolvedSrc(resourcePath);
             };
 
             void resolveImagePath();
