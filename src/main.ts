@@ -39,14 +39,14 @@ export default class MDXPlugin extends Plugin {
         }
 
         // Add ribbon icon to create new MDX file
-        this.addRibbonIcon('mdx-bw', 'New MDX file', () => {
+        this.addRibbonIcon('mdx-bw', 'New mdx file', () => {
             void this.createNewMDXFile();
         });
 
         // Add command to preview MDX file (for when auto-open is disabled)
         this.addCommand({
             id: 'preview-mdx',
-            name: 'Preview MDX',
+            name: 'Preview mdx',
             checkCallback: (checking: boolean) => {
                 const file = this.app.workspace.getActiveFile();
                 if (file && file.extension === 'mdx') {
@@ -62,7 +62,7 @@ export default class MDXPlugin extends Plugin {
         // Add command to create new MDX file
         this.addCommand({
             id: 'new-mdx-file',
-            name: 'New MDX file',
+            name: 'New mdx file',
             callback: () => {
                 void this.createNewMDXFile();
             }
@@ -71,7 +71,7 @@ export default class MDXPlugin extends Plugin {
         // Add command to edit MDX source
         this.addCommand({
             id: 'edit-mdx-source',
-            name: 'Edit MDX source',
+            name: 'Edit mdx source',
             checkCallback: (checking: boolean) => {
                 const file = this.app.workspace.getActiveFile();
                 if (file && file.extension === 'mdx') {
@@ -93,7 +93,7 @@ export default class MDXPlugin extends Plugin {
                 if (file instanceof TFile && file.extension === 'mdx') {
                     menu.addItem((item) => {
                         item
-                            .setTitle('Preview as MDX')
+                            .setTitle('Preview as mdx')
                             .setIcon('mdx-color')
                             .onClick(async () => {
                                 await this.openMDXPreview(file);
@@ -102,7 +102,7 @@ export default class MDXPlugin extends Plugin {
 
                     menu.addItem((item) => {
                         item
-                            .setTitle('Edit MDX source')
+                            .setTitle('Edit mdx source')
                             .setIcon('mdx-bw')
                             .onClick(async () => {
                                 await this.editMDXSource(file);
@@ -113,7 +113,7 @@ export default class MDXPlugin extends Plugin {
                 // Add "New MDX file" to folder context menus
                 menu.addItem((item) => {
                     item
-                        .setTitle('New MDX file')
+                        .setTitle('New mdx file')
                         .setIcon('mdx-bw')
                         .onClick(async () => {
                             let folder: string;
@@ -153,14 +153,14 @@ export default class MDXPlugin extends Plugin {
         }
 
         try {
-            const file = await this.app.vault.create(filename, '# New MDX file\n\nStart writing your MDX content here...\n');
+            const file = await this.app.vault.create(filename, '# New mdx file\n\nStart writing your mdx content here...\n');
             new Notice(`Created ${file.name}`);
 
             // Open the new file
             const leaf = this.app.workspace.getLeaf(false);
             await leaf.openFile(file, { active: true });
         } catch (error) {
-            new Notice(`Failed to create MDX file: ${error instanceof Error ? error.message : String(error)}`);
+            new Notice(`Failed to create mdx file: ${error instanceof Error ? error.message : String(error)}`);
             console.error('Error creating MDX file:', error);
         }
     }

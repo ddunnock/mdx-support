@@ -1,7 +1,7 @@
 {
   "id": "mdx-support",
   "name": "MDX Support",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAppVersion": "1.0.0",
   "description": "Render MDX files with interactive React components and Storybook support.",
   "author": "David Dunnock",

@@ -36,8 +36,8 @@ export class MDXSettingTab extends PluginSettingTab {
             .setHeading();
 
         new Setting(containerEl)
-            .setName('Auto-open MDX files')
-            .setDesc('Automatically render MDX files when clicked. If disabled, use the command palette to preview.')
+            .setName('Auto-open mdx files')
+            .setDesc('Automatically render mdx files when clicked. If disabled, use the command palette to preview.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.autoOpenMDX)
                 .onChange(async (value) => {
@@ -50,8 +50,8 @@ export class MDXSettingTab extends PluginSettingTab {
             .setHeading();
 
         new Setting(containerEl)
-            .setName('Enable JSX')
-            .setDesc('Allow JSX components in MDX files.')
+            .setName('Enable jsx')
+            .setDesc('Allow jsx components in mdx files.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableJSX)
                 .onChange(async (value) => {
@@ -60,8 +60,8 @@ export class MDXSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Allow HTML tags')
-            .setDesc('Allow raw HTML tags in MDX content.')
+            .setName('Allow html tags')
+            .setDesc('Allow raw html tags in mdx content.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.allowHTMLTags)
                 .onChange(async (value) => {
@@ -71,7 +71,7 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Theme')
-            .setDesc('Select the theme for MDX rendering.')
+            .setDesc('Select the theme for mdx rendering.')
             .addDropdown(dropdown => dropdown
                 .addOption('auto', 'auto')
                 .addOption('light', 'light')
@@ -84,7 +84,7 @@ export class MDXSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Enable syntax highlighting')
-            .setDesc('Enable syntax highlighting for code blocks in MDX.')
+            .setDesc('Enable syntax highlighting for code blocks in mdx.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableSyntaxHighlight)
                 .onChange(async (value) => {
