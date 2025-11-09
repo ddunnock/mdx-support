@@ -26,7 +26,7 @@ export class MDXView extends ItemView {
     }
 
     getDisplayText(): string {
-        return this.file?.basename ?? 'MDX view';
+        return this.file?.basename ?? 'mdx view';
     }
 
     getIcon(): string {
@@ -98,10 +98,10 @@ export class MDXView extends ItemView {
                 })
             );
         } catch (error) {
-            console.error('Error rendering MDX:', error);
+            console.error('Error rendering mdx:', error);
             this.containerEl.empty();
             this.containerEl.createEl('div', {
-                text: `Error rendering MDX: ${error instanceof Error ? error.message : String(error)}`,
+                text: `Error rendering mdx: ${error instanceof Error ? error.message : String(error)}`,
                 cls: 'mdx-error'
             });
         }
