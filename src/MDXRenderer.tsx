@@ -252,7 +252,7 @@ const defaultComponents = {
         const [resolvedSrc, setResolvedSrc] = useState<string>('');
 
         useEffect(() => {
-            const resolveVideoPath = async () => {
+            const resolveVideoPath = () => {
                 if (!props.src) {
                     setResolvedSrc('');
                     return;
@@ -384,7 +384,7 @@ const defaultComponents = {
         const [resolvedSrc, setResolvedSrc] = useState<string>('');
 
         useEffect(() => {
-            const resolveImagePath = async () => {
+            const resolveImagePath = () => {
                 if (!props.src) {
                     setResolvedSrc('');
                     return;
