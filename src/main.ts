@@ -161,7 +161,6 @@ export default class MDXPlugin extends Plugin {
             await leaf.openFile(file, { active: true });
         } catch (error) {
             new Notice(`Failed to create mdx file: ${error instanceof Error ? error.message : String(error)}`);
-            console.error('Error creating mdx file:', error);
         }
     }
 

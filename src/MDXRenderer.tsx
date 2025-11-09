@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { evaluate } from '@mdx-js/mdx';
 import * as runtime from 'react/jsx-runtime';
+import remarkGfm from 'remark-gfm';
+import { App } from 'obsidian';
 import { MDXPluginSettings } from './settings';
 
 // Helper to strip frontmatter from MDX content
@@ -29,10 +31,12 @@ interface MDXRendererProps {
     content: string;
     settings: MDXPluginSettings;
     filePath: string;
+    app: App;
 }
 
-// Context to pass filePath to components
+// Context to pass filePath and app to components
 const FilePathContext = React.createContext<string>('');
+const AppContext = React.createContext<App | null>(null);
 
 // Default components that can be used in MDX
 const defaultComponents = {
@@ -70,6 +74,7 @@ const defaultComponents = {
     // Storybook-specific components
     CodeSnippets: ({ path }: { path: string }) => {
         const currentFilePath = React.useContext(FilePathContext);
+        const app = React.useContext(AppContext);
         const [snippets, setSnippets] = useState<Array<{ code: string; language: string; filename: string; renderer: string; tabTitle: string }>>([]);
         const [activeTab, setActiveTab] = useState(0);
         const [loading, setLoading] = useState(true);
@@ -77,7 +82,11 @@ const defaultComponents = {
 
         useEffect(() => {
             const loadSnippet = async () => {
-                const app = (window as unknown as { app: { vault: { adapter: { read: (path: string) => Promise<string> } } } }).app;
+                if (!app) {
+                    setError('App instance not available');
+                    setLoading(false);
+                    return;
+                }
 
                 // Try multiple resolution strategies
                 const pathsToTry: string[] = [];
@@ -171,30 +180,16 @@ const defaultComponents = {
         const currentSnippet = snippets[activeTab];
 
         return (
-            <div className="mdx-code-snippets" style={{ margin: '1em 0' }}>
+            <div className="mdx-code-snippets">
                 {/* Tabs */}
-                <div style={{
-                    display: 'flex',
-                    gap: '0.5em',
-                    borderBottom: '1px solid var(--background-modifier-border)',
-                    marginBottom: '0.5em',
-                    flexWrap: 'wrap'
-                }}>
+                <div className="mdx-code-snippets-tabs">
                     {snippets.map((snippet, index) => {
                         const label = snippet.tabTitle || snippet.renderer || snippet.filename || `Tab ${index + 1}`;
                         return (
                             <button
                                 key={index}
                                 onClick={() => setActiveTab(index)}
-                                style={{
-                                    padding: '0.5em 1em',
-                                    background: activeTab === index ? 'var(--background-primary-alt)' : 'transparent',
-                                    border: 'none',
-                                    borderBottom: activeTab === index ? '2px solid var(--interactive-accent)' : 'none',
-                                    color: 'var(--text-normal)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9em'
-                                }}
+                                className={`mdx-code-snippet-tab ${activeTab === index ? 'mdx-code-snippet-tab-active' : ''}`}
                             >
                                 {label}
                             </button>
@@ -205,22 +200,11 @@ const defaultComponents = {
                 {/* Code display */}
                 <div>
                     {currentSnippet.filename && (
-                        <div style={{
-                            fontSize: '0.85em',
-                            color: 'var(--text-muted)',
-                            marginBottom: '0.5em',
-                            fontFamily: 'var(--font-monospace)'
-                        }}>
+                        <div className="mdx-code-snippet-filename">
                             {currentSnippet.filename}
                         </div>
                     )}
-                    <pre style={{
-                        background: 'var(--background-primary-alt)',
-                        padding: '1em',
-                        borderRadius: '4px',
-                        overflow: 'auto',
-                        margin: 0
-                    }}>
+                    <pre className="mdx-code-snippet-content">
                         <code>{currentSnippet.code}</code>
                     </pre>
                 </div>
@@ -239,6 +223,7 @@ const defaultComponents = {
     ),
     Video: (props: { src?: string; autoPlay?: boolean; loop?: boolean; muted?: boolean; children?: React.ReactNode }) => {
         const currentFilePath = React.useContext(FilePathContext);
+        const app = React.useContext(AppContext);
         const [resolvedSrc, setResolvedSrc] = useState<string>('');
 
         useEffect(() => {
@@ -254,16 +239,10 @@ const defaultComponents = {
                     return;
                 }
 
-                const app = (window as unknown as {
-                    app: {
-                        vault: {
-                            adapter: {
-                                getResourcePath: (path: string) => string;
-                            };
-                            getFiles: () => Array<{ path: string; name: string }>
-                        }
-                    }
-                }).app;
+                if (!app) {
+                    setResolvedSrc(props.src);
+                    return;
+                }
 
                 const pathsToTry: string[] = [];
 
@@ -304,20 +283,19 @@ const defaultComponents = {
                     pathsToTry.push(props.src);
                 }
 
-                // Check which path actually exists by looking at vault files
-                const files = app.vault.getFiles();
+                // Check which path actually exists using direct lookups
                 let resolvedPath = pathsToTry[0]; // Default to first path
 
                 for (const tryPath of pathsToTry) {
-                    const fileExists = files.some(file => file.path === tryPath);
-                    if (fileExists) {
+                    const file = app.vault.getAbstractFileByPath(tryPath);
+                    if (file) {
                         resolvedPath = tryPath;
                         break;
                     }
                 }
 
                 const resourcePath = app.vault.adapter.getResourcePath(resolvedPath);
-                setResolvedSrc(resourcePath);
+                setResolvedSrc(resolvedPath);
             };
 
             void resolveVideoPath();
@@ -325,7 +303,7 @@ const defaultComponents = {
 
         if (!props.src) {
             return (
-                <div style={{ padding: '20px', color: 'var(--text-muted)', textAlign: 'center' as const }}>
+                <div className="mdx-video-placeholder">
                     Video source not provided
                 </div>
             );
@@ -347,15 +325,10 @@ const defaultComponents = {
             }
 
             return (
-                <div style={{ margin: '1em 0' }}>
+                <div className="mdx-video-container">
                     <iframe
                         src={embedSrc}
-                        style={{
-                            width: '100%',
-                            height: '400px',
-                            border: 'none',
-                            borderRadius: '4px'
-                        }}
+                        className="mdx-video-iframe"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                     />
@@ -365,18 +338,14 @@ const defaultComponents = {
 
         // Direct video file with resolved path
         return (
-            <div style={{ margin: '1em 0' }}>
+            <div className="mdx-video-container">
                 <video
                     src={resolvedSrc}
                     controls
                     autoPlay={props.autoPlay}
                     loop={props.loop}
                     muted={props.muted}
-                    style={{
-                        width: '100%',
-                        maxWidth: '800px',
-                        borderRadius: '4px'
-                    }}
+                    className="mdx-video-element"
                 >
                     Your browser does not support the video tag.
                 </video>
@@ -386,6 +355,7 @@ const defaultComponents = {
     // Custom img component to handle relative paths and wikilinks
     img: (props: { src?: string; alt?: string; title?: string }) => {
         const currentFilePath = React.useContext(FilePathContext);
+        const app = React.useContext(AppContext);
         const [resolvedSrc, setResolvedSrc] = useState<string>('');
 
         useEffect(() => {
@@ -401,27 +371,19 @@ const defaultComponents = {
                     return;
                 }
 
-                const app = (window as unknown as {
-                    app: {
-                        vault: {
-                            adapter: {
-                                getResourcePath: (path: string) => string;
-                                exists: (path: string) => Promise<boolean>;
-                            };
-                            getFiles: () => Array<{ path: string; name: string }>
-                        }
-                    }
-                }).app;
+                if (!app) {
+                    setResolvedSrc(props.src);
+                    return;
+                }
 
-                // For wikilink-style paths (just filename, no path separators) - search vault
+                // For wikilink-style paths (just filename, no path separators) - use metadataCache
                 if (!props.src.includes('/')) {
                     try {
-                        // Search through all files in the vault
-                        const files = app.vault.getFiles();
-                        const matchingFile = files.find(file => file.name === props.src);
+                        // Use Obsidian's metadata cache to resolve wikilinks
+                        const file = app.metadataCache.getFirstLinkpathDest(props.src, currentFilePath);
 
-                        if (matchingFile) {
-                            const resourcePath = app.vault.adapter.getResourcePath(matchingFile.path);
+                        if (file) {
+                            const resourcePath = app.vault.adapter.getResourcePath(file.path);
                             setResolvedSrc(resourcePath);
                             return;
                         }
@@ -470,20 +432,19 @@ const defaultComponents = {
                     pathsToTry.push(props.src);
                 }
 
-                // Check which path actually exists by looking at vault files
-                const files = app.vault.getFiles();
+                // Check which path actually exists using direct lookups
                 let resolvedPath = pathsToTry[0]; // Default to first path
 
                 for (const tryPath of pathsToTry) {
-                    const fileExists = files.some(file => file.path === tryPath);
-                    if (fileExists) {
+                    const file = app.vault.getAbstractFileByPath(tryPath);
+                    if (file) {
                         resolvedPath = tryPath;
                         break;
                     }
                 }
 
                 const resourcePath = app.vault.adapter.getResourcePath(resolvedPath);
-                setResolvedSrc(resourcePath);
+                setResolvedSrc(resolvedPath);
             };
 
             void resolveImagePath();
@@ -494,24 +455,19 @@ const defaultComponents = {
                 src={resolvedSrc}
                 alt={props.alt || ''}
                 title={props.title}
-                style={{ maxWidth: '100%', height: 'auto' }}
             />
         );
     },
     // Table components for markdown tables
     table: ({ children }: { children: React.ReactNode }) => (
-        <div style={{ overflowX: 'auto', margin: '1em 0' }}>
-            <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                border: '1px solid var(--background-modifier-border)'
-            }}>
+        <div className="mdx-table-wrapper">
+            <table>
                 {children}
             </table>
         </div>
     ),
     thead: ({ children }: { children: React.ReactNode }) => (
-        <thead style={{ backgroundColor: 'var(--background-primary-alt)' }}>
+        <thead>
             {children}
         </thead>
     ),
@@ -519,25 +475,17 @@ const defaultComponents = {
         <tbody>{children}</tbody>
     ),
     tr: ({ children }: { children: React.ReactNode }) => (
-        <tr style={{ borderBottom: '1px solid var(--background-modifier-border)' }}>
+        <tr>
             {children}
         </tr>
     ),
     th: ({ children }: { children: React.ReactNode }) => (
-        <th style={{
-            padding: '0.75em',
-            textAlign: 'left',
-            fontWeight: 'bold',
-            borderRight: '1px solid var(--background-modifier-border)'
-        }}>
+        <th>
             {children}
         </th>
     ),
     td: ({ children }: { children: React.ReactNode }) => (
-        <td style={{
-            padding: '0.75em',
-            borderRight: '1px solid var(--background-modifier-border)'
-        }}>
+        <td>
             {children}
         </td>
     ),
@@ -551,19 +499,12 @@ const componentsWithFallback = new Proxy(defaultComponents, {
         }
         // Return a fallback component for undefined components
         return (props: { children?: React.ReactNode }) => (
-            <div className="mdx-component-placeholder" style={{
-                padding: '15px',
-                border: '2px dashed var(--background-modifier-border)',
-                borderRadius: '4px',
-                margin: '10px 0',
-                backgroundColor: 'var(--background-secondary)',
-                color: 'var(--text-muted)'
-            }}>
-                <div style={{ fontWeight: 'bold' }}>⚠️ Component `{prop}` not available</div>
-                <div style={{ fontSize: '0.9em', marginTop: '5px' }}>
+            <div className="mdx-component-placeholder">
+                <div className="mdx-component-placeholder-title">⚠️ Component `{prop}` not available</div>
+                <div className="mdx-component-placeholder-description">
                     This component is not defined in the preview.
                 </div>
-                {props.children && <div style={{ marginTop: '10px' }}>{props.children}</div>}
+                {props.children && <div className="mdx-component-placeholder-children">{props.children}</div>}
             </div>
         );
     }
@@ -571,7 +512,7 @@ const componentsWithFallback = new Proxy(defaultComponents, {
 
 type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<Record<string, unknown>>> }>;
 
-export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, filePath }) => {
+export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, filePath, app }) => {
     const [Component, setComponent] = useState<MDXComponent | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -588,6 +529,7 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
                 const { default: MDXContent } = await evaluate(processedContent, {
                     ...runtime,
                     development: false,
+                    remarkPlugins: [remarkGfm],
                     useMDXComponents: () => componentsWithFallback as unknown as Record<string, React.ComponentType<Record<string, unknown>>>,
                 });
 
@@ -616,10 +558,12 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
     }
 
     return (
-        <FilePathContext.Provider value={filePath}>
-            <div className="mdx-content">
-                <Component components={componentsWithFallback as unknown as Record<string, React.ComponentType<Record<string, unknown>>>} />
-            </div>
-        </FilePathContext.Provider>
+        <AppContext.Provider value={app}>
+            <FilePathContext.Provider value={filePath}>
+                <div className="mdx-content">
+                    <Component components={componentsWithFallback as unknown as Record<string, React.ComponentType<Record<string, unknown>>>} />
+                </div>
+            </FilePathContext.Provider>
+        </AppContext.Provider>
     );
 };

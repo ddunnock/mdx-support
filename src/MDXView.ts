@@ -94,11 +94,11 @@ export class MDXView extends ItemView {
                 React.createElement(MDXRenderer, {
                     content,
                     settings: this.plugin.settings,
-                    filePath: this.file.path
+                    filePath: this.file.path,
+                    app: this.app
                 })
             );
         } catch (error) {
-            console.error('Error rendering mdx:', error);
             this.containerEl.empty();
             this.containerEl.createEl('div', {
                 text: `Error rendering mdx: ${error instanceof Error ? error.message : String(error)}`,
