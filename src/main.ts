@@ -153,7 +153,7 @@ export default class MDXPlugin extends Plugin {
         }
 
         try {
-            const file = await this.app.vault.create(filename, '# New MDX File\n\nStart writing your MDX content here...\n');
+            const file = await this.app.vault.create(filename, '# New MDX file\n\nStart writing your MDX content here...\n');
             new Notice(`Created ${file.name}`);
 
             // Open the new file

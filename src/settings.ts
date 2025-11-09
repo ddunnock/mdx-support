@@ -73,9 +73,9 @@ export class MDXSettingTab extends PluginSettingTab {
             .setName('Theme')
             .setDesc('Select the theme for MDX rendering.')
             .addDropdown(dropdown => dropdown
-                .addOption('auto', 'Auto')
-                .addOption('light', 'Light')
-                .addOption('dark', 'Dark')
+                .addOption('auto', 'auto')
+                .addOption('light', 'light')
+                .addOption('dark', 'dark')
                 .setValue(this.plugin.settings.theme)
                 .onChange(async (value) => {
                     this.plugin.settings.theme = value as 'light' | 'dark' | 'auto';

@@ -12,8 +12,7 @@ declare module '@mdx-js/mdx' {
 
     export interface EvaluateOptions extends CompileOptions {
         development?: boolean;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        useMDXComponents?: () => Record<string, React.ComponentType<any>>;
+        useMDXComponents?: () => Record<string, React.ComponentType<Record<string, unknown>>>;
     }
 
     export function compile(
@@ -24,14 +23,12 @@ declare module '@mdx-js/mdx' {
     export function evaluate(
         content: string,
         options?: EvaluateOptions
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): Promise<{ default: React.ComponentType<any> }>;
+    ): Promise<{ default: React.ComponentType<Record<string, unknown>> }>;
 
     export function run(
         code: string,
         options?: CompileOptions
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): Promise<{ default: React.ComponentType<any> }>;
+    ): Promise<{ default: React.ComponentType<Record<string, unknown>> }>;
 }
 
 declare module '@mdx-js/react' {
@@ -39,8 +36,7 @@ declare module '@mdx-js/react' {
 
     export interface MDXProviderProps {
         children: React.ReactNode;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        components?: Record<string, React.ComponentType<any>>;
+        components?: Record<string, React.ComponentType<Record<string, unknown>>>;
     }
 
     export const MDXProvider: React.FC<MDXProviderProps>;

@@ -67,8 +67,7 @@ const defaultComponents = {
     ),
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<any>> }>;
+type MDXComponent = React.ComponentType<{ components?: Record<string, React.ComponentType<Record<string, unknown>>> }>;
 
 export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, filePath }) => {
     const [Component, setComponent] = useState<MDXComponent | null>(null);
@@ -84,7 +83,7 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
                 const { default: MDXContent } = await evaluate(contentWithoutFrontmatter, {
                     ...runtime,
                     development: false,
-                    useMDXComponents: () => defaultComponents,
+                    useMDXComponents: () => defaultComponents as unknown as Record<string, React.ComponentType<Record<string, unknown>>>,
                 });
 
                 setComponent(() => MDXContent);
@@ -113,7 +112,7 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
 
     return (
         <div className="mdx-content">
-            <Component components={defaultComponents} />
+            <Component components={defaultComponents as unknown as Record<string, React.ComponentType<Record<string, unknown>>>} />
         </div>
     );
 };
