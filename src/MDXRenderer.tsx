@@ -5,6 +5,25 @@ import * as runtime from 'react/jsx-runtime';
 import remarkGfm from 'remark-gfm';
 import { App } from 'obsidian';
 import { MDXPluginSettings } from './settings';
+import { highlight, type Theme } from '@code-hike/lighter';
+
+// Inline minimal dark theme to avoid network fetches
+const darkTheme: Theme = {
+    name: 'github-dark',
+    colors: {
+        'editor.background': '#0d1117',
+        'editor.foreground': '#c9d1d9',
+    },
+    tokenColors: [
+        { scope: ['comment'], settings: { foreground: '#8b949e', fontStyle: 'italic' } },
+        { scope: ['string'], settings: { foreground: '#a5d6ff' } },
+        { scope: ['keyword', 'storage'], settings: { foreground: '#ff7b72' } },
+        { scope: ['variable', 'entity.name.function'], settings: { foreground: '#d2a8ff' } },
+        { scope: ['constant.numeric', 'constant.language'], settings: { foreground: '#79c0ff' } },
+        { scope: ['entity.name.type', 'entity.name.class'], settings: { foreground: '#ffa657' } },
+        { scope: ['support.type', 'support.class'], settings: { foreground: '#79c0ff' } },
+    ],
+};
 
 // Helper to strip frontmatter from MDX content
 function stripFrontmatter(content: string): string {
@@ -37,6 +56,46 @@ interface MDXRendererProps {
 // Context to pass filePath and app to components
 const FilePathContext = React.createContext<string>('');
 const AppContext = React.createContext<App | null>(null);
+const PreferencesContext = React.createContext<{ language: 'js' | 'ts'; renderer: string }>({ language: 'ts', renderer: 'react' });
+
+// Highlighted code component using Code Hike lighter
+const HighlightedCode = ({ code, language }: { code: string; language: string }) => {
+    const [highlighted, setHighlighted] = useState<{ lines: Array<Array<{ style?: { color?: string }; content: string }>>; style: { color?: string; background?: string } } | null>(null);
+
+    useEffect(() => {
+        const highlightCode = async () => {
+            try {
+                const result = await highlight(code, language, darkTheme);
+                setHighlighted(result);
+            } catch (error) {
+                // If highlighting fails, just show plain code
+                console.warn('Syntax highlighting failed:', error);
+                setHighlighted(null);
+            }
+        };
+        void highlightCode();
+    }, [code, language]);
+
+    if (!highlighted) {
+        // Fallback to plain code while loading or if highlighting fails
+        return <code>{code}</code>;
+    }
+
+    return (
+        <code>
+            {highlighted.lines.map((line, lineIndex) => (
+                <React.Fragment key={lineIndex}>
+                    {line.map((token, tokenIndex) => (
+                        <span key={tokenIndex} style={token.style}>
+                            {token.content}
+                        </span>
+                    ))}
+                    {lineIndex < highlighted.lines.length - 1 && '\n'}
+                </React.Fragment>
+            ))}
+        </code>
+    );
+};
 
 // Default components that can be used in MDX
 const defaultComponents = {
@@ -75,6 +134,7 @@ const defaultComponents = {
     CodeSnippets: ({ path }: { path: string }) => {
         const currentFilePath = React.useContext(FilePathContext);
         const app = React.useContext(AppContext);
+        const preferences = React.useContext(PreferencesContext);
         const [snippets, setSnippets] = useState<Array<{ code: string; language: string; filename: string; renderer: string; tabTitle: string }>>([]);
         const [activeTab, setActiveTab] = useState(0);
         const [loading, setLoading] = useState(true);
@@ -116,8 +176,17 @@ const defaultComponents = {
 
                 let success = false;
                 let lastError = '';
+                let debugPaths = pathsToTry.join(', ');
+                
                 for (const tryPath of pathsToTry) {
                     try {
+                        // First verify the file exists using Obsidian's vault API
+                        const file = app.vault.getAbstractFileByPath(tryPath);
+                        if (!file) {
+                            lastError = `File not found in vault: ${tryPath}`;
+                            continue;
+                        }
+                        
                         const fileContent = await app.vault.adapter.read(tryPath);
 
                         // Parse code blocks from markdown
@@ -158,7 +227,7 @@ const defaultComponents = {
                 }
 
                 if (!success) {
-                    setError(`Could not load: ${path}\nLast error: ${lastError}`);
+                    setError(`Could not load: ${path}\nTried paths: ${debugPaths}\nLast error: ${lastError}`);
                 }
                 setLoading(false);
             };
@@ -177,25 +246,63 @@ const defaultComponents = {
             return <div className="mdx-code-snippets">No snippets found</div>;
         }
 
-        const currentSnippet = snippets[activeTab];
+        // Filter snippets based on user preferences
+        const filteredSnippets = snippets.filter(snippet => {
+            const languageMatch = snippet.language === preferences.language;
+            
+            // For renderer matching:
+            // - If preference is 'common', show common and empty renderer snippets
+            // - Otherwise, show matching renderer OR common snippets
+            let rendererMatch = false;
+            if (preferences.renderer === 'common') {
+                rendererMatch = snippet.renderer === 'common' || !snippet.renderer;
+            } else {
+                rendererMatch = snippet.renderer === preferences.renderer || snippet.renderer === 'common';
+            }
+            
+            return languageMatch && rendererMatch;
+        });
+        
+        // If no snippets match, fall back to language-only filter
+        const displaySnippets = filteredSnippets.length > 0 
+            ? filteredSnippets 
+            : snippets.filter(s => s.language === preferences.language);
+        
+        // If still no snippets, show all (shouldn't happen with valid snippets)
+        const finalSnippets = displaySnippets.length > 0 ? displaySnippets : snippets;
+        
+        // Ensure activeTab is valid for filtered snippets
+        const validActiveTab = activeTab >= finalSnippets.length ? 0 : activeTab;
+        const currentSnippet = finalSnippets[validActiveTab];
+        
+        // Group snippets by tabTitle for version selection
+        const tabGroups = finalSnippets.reduce((acc, snippet, index) => {
+            const title = snippet.tabTitle || 'Code';
+            if (!acc[title]) {
+                acc[title] = [];
+            }
+            acc[title].push({ snippet, index });
+            return acc;
+        }, {} as Record<string, Array<{ snippet: typeof snippets[0]; index: number }>>);
+        
+        const tabTitles = Object.keys(tabGroups);
 
         return (
             <div className="mdx-code-snippets">
-                {/* Tabs */}
-                <div className="mdx-code-snippets-tabs">
-                    {snippets.map((snippet, index) => {
-                        const label = snippet.tabTitle || snippet.renderer || snippet.filename || `Tab ${index + 1}`;
-                        return (
+                {/* Version/Type Tabs (CSF 3, CSF Next, etc.) - only show if multiple versions */}
+                {tabTitles.length > 1 && (
+                    <div className="mdx-code-snippets-tabs">
+                        {tabTitles.map((title) => (
                             <button
-                                key={index}
-                                onClick={() => setActiveTab(index)}
-                                className={`mdx-code-snippet-tab ${activeTab === index ? 'mdx-code-snippet-tab-active' : ''}`}
+                                key={title}
+                                onClick={() => setActiveTab(tabGroups[title][0].index)}
+                                className={`mdx-code-snippet-tab ${tabGroups[title].some(t => t.index === validActiveTab) ? 'mdx-code-snippet-tab-active' : ''}`}
                             >
-                                {label}
+                                {title}
                             </button>
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Code display */}
                 <div>
@@ -205,7 +312,7 @@ const defaultComponents = {
                         </div>
                     )}
                     <pre className="mdx-code-snippet-content">
-                        <code>{currentSnippet.code}</code>
+                        <HighlightedCode code={currentSnippet.code} language={currentSnippet.language} />
                     </pre>
                 </div>
             </div>
@@ -585,9 +692,11 @@ export const MDXRenderer: React.FC<MDXRendererProps> = ({ content, settings, fil
     return (
         <AppContext.Provider value={app}>
             <FilePathContext.Provider value={filePath}>
-                <div className="mdx-content">
-                    <Component components={componentsWithFallback as unknown as Record<string, React.ComponentType<Record<string, unknown>>>} />
-                </div>
+                <PreferencesContext.Provider value={{ language: settings.preferredLanguage, renderer: settings.preferredRenderer }}>
+                    <div className="mdx-content">
+                        <Component components={componentsWithFallback as unknown as Record<string, React.ComponentType<Record<string, unknown>>>} />
+                    </div>
+                </PreferencesContext.Provider>
             </FilePathContext.Provider>
         </AppContext.Provider>
     );

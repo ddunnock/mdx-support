@@ -32,13 +32,16 @@ Ready-to-use React components for interactive content:
 - **JSX control** - Enable/disable JSX components
 - **HTML tags** - Allow or restrict raw HTML
 - **Theme support** - Auto, light, or dark mode
-- **Syntax highlighting** - Enhanced code block styling
+- **Syntax highlighting** - Code Hike-powered highlighting with theme support
+- **Storybook preferences** - Set preferred language (JS/TS) and framework
 
 ### 🎯 Storybook Integration
 Perfect for importing Storybook documentation:
-- Automatic frontmatter stripping
-- Storybook-specific component support
-- Compatible with Storybook MDX file format
+- **Smart code filtering** - Set preferred language (JS/TS) and framework (React/Vue/Angular/Svelte)
+- **Syntax highlighting** - Beautiful Code Hike-powered syntax highlighting
+- **Automatic frontmatter stripping** - Handles Storybook metadata
+- **Storybook-specific components** - CodeSnippets, IfRenderer, and more
+- **Cross-platform** - Works on Windows, macOS, and Linux
 
 ## Installation
 
@@ -187,7 +190,9 @@ Special thanks to the MDX team for creating an amazing format for interactive do
 
 ## Roadmap
 
-- [ ] Advanced syntax highlighting (Code Hike style)
+- [x] ~~Advanced syntax highlighting (Code Hike style)~~ ✅ v1.3.0
+- [x] ~~Storybook code snippet filtering~~ ✅ v1.3.0
+- [ ] Theme-aware syntax highlighting (match Obsidian theme)
 - [ ] Custom component loader
 - [ ] MDX plugin system (remark/rehype)
 - [ ] Export to HTML

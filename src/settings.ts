@@ -8,6 +8,9 @@ export interface MDXPluginSettings {
     customComponents: Record<string, string>;
     autoOpenMDX: boolean;
     enableSyntaxHighlight: boolean;
+    // Storybook code snippet preferences
+    preferredLanguage: 'js' | 'ts';
+    preferredRenderer: string;
 }
 
 export const DEFAULT_SETTINGS: MDXPluginSettings = {
@@ -16,7 +19,9 @@ export const DEFAULT_SETTINGS: MDXPluginSettings = {
     theme: 'auto',
     customComponents: {},
     autoOpenMDX: true,
-    enableSyntaxHighlight: true
+    enableSyntaxHighlight: true,
+    preferredLanguage: 'ts',
+    preferredRenderer: 'react'
 };
 
 export class MDXSettingTab extends PluginSettingTab {
@@ -89,6 +94,38 @@ export class MDXSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.enableSyntaxHighlight)
                 .onChange(async (value) => {
                     this.plugin.settings.enableSyntaxHighlight = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Storybook Code Snippets')
+            .setHeading();
+
+        new Setting(containerEl)
+            .setName('Preferred language')
+            .setDesc('Default language for Storybook code snippets (JavaScript or TypeScript).')
+            .addDropdown(dropdown => dropdown
+                .addOption('ts', 'TypeScript')
+                .addOption('js', 'JavaScript')
+                .setValue(this.plugin.settings.preferredLanguage)
+                .onChange(async (value) => {
+                    this.plugin.settings.preferredLanguage = value as 'js' | 'ts';
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Preferred framework')
+            .setDesc('Default framework for Storybook code snippets.')
+            .addDropdown(dropdown => dropdown
+                .addOption('react', 'React')
+                .addOption('vue', 'Vue')
+                .addOption('angular', 'Angular')
+                .addOption('svelte', 'Svelte')
+                .addOption('web-components', 'Web Components')
+                .addOption('common', 'All/Common')
+                .setValue(this.plugin.settings.preferredRenderer)
+                .onChange(async (value) => {
+                    this.plugin.settings.preferredRenderer = value;
                     await this.plugin.saveSettings();
                 }));
     }

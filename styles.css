@@ -298,8 +298,16 @@
     background: var(--background-primary-alt);
     padding: 1em;
     border-radius: 4px;
-    overflow: auto;
+    overflow-x: auto;
     margin: 0;
+}
+
+.mdx-code-snippet-content code {
+    display: block;
+    background: transparent !important;
+    padding: 0;
+    white-space: pre;
+    min-width: max-content;
 }
 
 /* Video Container */
